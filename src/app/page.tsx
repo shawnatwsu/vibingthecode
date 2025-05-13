@@ -20,9 +20,19 @@ export default async function Home() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: plans, error } = await supabase.functions.invoke(
-    "supabase-functions-get-plans",
-  );
+  // Try to fetch plans, but handle errors gracefully
+  let plans = [];
+  try {
+    const { data, error } = await supabase.functions.invoke(
+      "supabase-functions-get-plans",
+    );
+    if (data && !error) {
+      plans = data;
+    }
+  } catch (e) {
+    // Silently handle the error to prevent 500 errors
+    console.error("Error fetching plans:", e);
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
